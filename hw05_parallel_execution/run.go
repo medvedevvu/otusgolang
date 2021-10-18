@@ -2,7 +2,7 @@ package hw05parallelexecution
 
 import (
 	"errors"
-	"fmt"
+	"sync"
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
@@ -10,72 +10,54 @@ var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
 type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
+
 func Run(tasks []Task, n, m int) error {
-	curOkCounter , curErrorCounter  := 0 , 0
-	var (
-		errChan chan struct{}
-		okChan  chan struct{}
-		alarmStop chan struct{}
-	)
-
-   defer func() {
-	   close(okChan)
-	   close(errChan)
-	   close(alarmStop)
-   }()
-
-	for  {
-		if len(tasks) == 0 {
-		  break
-		}
-		//1. Возьмем n заданий
-		curTasks := make([]Task, n, n)
-		copy(curTasks, tasks[:n])
-		tasks = tasks[:n]
-		errChan   = make(chan struct{}, n)
-		okChan    = make(chan struct{}, n)
-		alarmStop = make(chan struct{}, n)
-		fmt.Println( len(tasks) , len(curTasks) )
-		for _, task := range curTasks {
-			go func(t Task) {
-				err := task()
+	taskChanal := make(chan Task, len(tasks))
+	errChanl := make(chan int, len(tasks))
+	okChan := make(chan int, len(tasks))
+	errCounter := 0
+	okCounter := 0
+	for _, item := range tasks {
+		taskChanal <- item
+	}
+	close(taskChanal)
+	wg := sync.WaitGroup{}
+	for i := 0; i < n; i++ {
+		go func(inChanal chan Task) {
+			defer wg.Done()
+			wg.Add(1)
+			for el := range inChanal {
+				err := el()
 				if err != nil {
-					errChan <- struct{}{}
-					return
+					errChanl <- 1
 				}
-				okChan <- struct{}{}
-				return
-			}(task)
+				okChan <- 1
+			}
+		}(taskChanal)
+	}
+Loop:
+	for {
+		select {
+		case err, hOK := <-errChanl:
+			if hOK {
+				errCounter += err
+			}
+		case ok, hOK := <-okChan:
+			if hOK {
+				okCounter += ok
+			}
+		default:
+			if errCounter > m {
+				return ErrErrorsLimitExceeded
+			}
+			if okCounter == len(tasks) {
+				break Loop
+			}
+			if (errCounter + okCounter) >= len(tasks) {
+				break Loop
+			}
 		}
 	}
-
-	for  {
- 	  if len(tasks) == 0 {
-			break
-	     }
- 	  select {
-	    case _, ok := <-okChan:
-			 if ok {
-				 curOkCounter++
-			 }
-	    case _, ok := <-errChan:
-			if ok {
-				curErrorCounter++
-			}
-	    default:
-		    if curErrorCounter == m {
-			// Побить все задания
-			var i int
-			for {
-				if i == n {
-					break
-				}
-				alarmStop <- struct{}{}
-				i++
-			}
-			return ErrErrorsLimitExceeded
-		    }
-	    }
-	}
+	wg.Wait()
 	return nil
 }
