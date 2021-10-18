@@ -1,4 +1,4 @@
-module github.com/medvedevvu/otusgolang/tree/master/hw05_parallel_execution
+module github.com/medvedevvu/otusgolang/hw05_parallel_execution
 
 go 1.16
 
