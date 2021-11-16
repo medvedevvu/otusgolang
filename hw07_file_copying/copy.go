@@ -31,35 +31,24 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if err != nil {
 		return ErrUnsupportedFile
 	}
-
 	if offset > fromInfo.Size() {
 		return ErrOffsetExceedsFileSize
 	}
-
 	if fromInfo.Size() == 0 {
 		return ErrUnsupportedFile
 	}
-
 	if offset == 0 && limit == 0 {
 		_, err = io.Copy(fileTo, fromFile)
 		if err != nil {
 			return err
 		}
 	}
+	var tempBuff []byte
 	if offset == 0 && limit != 0 {
-		var tempBuff []byte
 		if limit >= fromInfo.Size() {
 			tempBuff = make([]byte, fromInfo.Size())
 		} else {
 			tempBuff = make([]byte, limit)
-		}
-		_, err = fromFile.Read(tempBuff)
-		if err != nil {
-			return err
-		}
-		_, err = fileTo.Write(tempBuff)
-		if err != nil {
-			return err
 		}
 	}
 	if offset > 0 && limit > 0 {
@@ -67,20 +56,19 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		if err != nil {
 			return err
 		}
-		var tempBuff []byte
 		if (offset + limit) > fromInfo.Size() {
 			tempBuff = make([]byte, int64(math.Abs(float64(offset-fromInfo.Size()))))
 		} else {
 			tempBuff = make([]byte, limit)
 		}
-		_, err = fromFile.Read(tempBuff)
-		if err != nil {
-			return err
-		}
-		_, err = fileTo.Write(tempBuff)
-		if err != nil {
-			return err
-		}
+	}
+	_, err = fromFile.Read(tempBuff)
+	if err != nil {
+		return err
+	}
+	_, err = fileTo.Write(tempBuff)
+	if err != nil {
+		return err
 	}
 	return nil
 }
