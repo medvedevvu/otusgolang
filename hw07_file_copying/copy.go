@@ -29,14 +29,17 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	fromInfo, err := os.Stat(fromPath)
 	if err != nil {
+		return err
+	}
+
+	if !fromInfo.Mode().IsRegular() {
 		return ErrUnsupportedFile
 	}
+
 	if offset > fromInfo.Size() {
 		return ErrOffsetExceedsFileSize
 	}
-	if fromInfo.Size() == 0 {
-		return ErrUnsupportedFile
-	}
+
 	if offset == 0 && limit == 0 {
 		_, err = io.Copy(fileTo, fromFile)
 		if err != nil {
