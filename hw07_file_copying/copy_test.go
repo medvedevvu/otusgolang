@@ -20,8 +20,8 @@ func TestEasyCopy(t *testing.T) {
 			msg:      "Easy coping from source to dest",
 			offset:   0,
 			limit:    0,
-			fromPath: ".//testdata//input.txt",
-			toPath:   "c://tmp//out_offset0_limit0.txt",
+			fromPath: "./testdata/input.txt",
+			toPath:   "./out/out_offset0_limit0.txt",
 		},
 	}
 	for _, tc := range tests {
@@ -57,22 +57,22 @@ func TestCopyOffset0LimitNot(t *testing.T) {
 			msg:      "coping from source to dest - offset 0 , limit 10",
 			offset:   0,
 			limit:    10,
-			fromPath: ".//testdata//input.txt",
-			toPath:   "c://tmp//out_offset0_limit10.txt",
+			fromPath: "./testdata/input.txt",
+			toPath:   "./out/out_offset0_limit10.txt",
 		},
 		{
 			msg:      "coping from source to dest - offset 0 , limit 1000",
 			offset:   0,
 			limit:    1000,
-			fromPath: ".//testdata//input.txt",
-			toPath:   "c://tmp//out_offset0_limit1000.txt",
+			fromPath: "./testdata/input.txt",
+			toPath:   "./out/out_offset0_limit1000.txt",
 		},
 		{
 			msg:      "coping from source to dest - offset 0 , limit 10000",
 			offset:   0,
 			limit:    10000,
-			fromPath: ".//testdata//input.txt",
-			toPath:   "c://tmp//out_offset0_limit10000.txt",
+			fromPath: "./testdata/input.txt",
+			toPath:   "./out/out_offset0_limit10000.txt",
 		},
 	}
 
@@ -120,15 +120,15 @@ func TestCopyOffsetLimit(t *testing.T) {
 			msg:      "coping from source to dest - offset 100 , limit 1000",
 			offset:   100,
 			limit:    1000,
-			fromPath: ".//testdata//input.txt",
-			toPath:   "c://tmp//out_offset100_limit1000.txt",
+			fromPath: "./testdata/input.txt",
+			toPath:   "./out/out_offset100_limit1000.txt",
 		},
 		{
 			msg:      "coping from source to dest - offset 6000 , limit 1000",
 			offset:   6000,
 			limit:    1000,
-			fromPath: ".//testdata//input.txt",
-			toPath:   "c://tmp//out_offset6000_limit1000.txt",
+			fromPath: "./testdata/input.txt",
+			toPath:   "./out/out_offset6000_limit1000.txt",
 		},
 	}
 
@@ -175,8 +175,8 @@ func TestCopyErrs(t *testing.T) {
 			msg:      "Too big offset ",
 			offset:   7000,
 			limit:    100,
-			fromPath: ".//testdata//input.txt",
-			toPath:   "c://tmp//out_offset7000_limit100.txt",
+			fromPath: "./testdata/input.txt",
+			toPath:   "./out/out_offset7000_limit100.txt",
 			errmt:    "Too big offset wait %d got %d \n",
 		},
 	}
