@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"math"
 	"os"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 var (
@@ -65,13 +68,30 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 			tempBuff = make([]byte, limit)
 		}
 	}
-	_, err = fromFile.Read(tempBuff)
+
+	err = progressBar(fromFile, fileTo, tempBuff, limit)
 	if err != nil {
 		return err
 	}
-	_, err = fileTo.Write(tempBuff)
+	return nil
+}
+
+func progressBar(fromFile, fileTo *os.File, tempBuff []byte, limit int64) error {
+	_, err := fromFile.Read(tempBuff)
 	if err != nil {
 		return err
 	}
+
+	newReader := bytes.NewReader(tempBuff)
+	bar := pb.Full.Start64(limit)
+	barReader := bar.NewProxyReader(newReader)
+	bar.Set(pb.Bytes, true)
+	_, err = io.CopyN(fileTo, barReader, limit)
+	if err != nil {
+		if !errors.Is(err, io.EOF) {
+			return err
+		}
+	}
+	bar.Finish()
 	return nil
 }
